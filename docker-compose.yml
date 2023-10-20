@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+ database-layer:
+    image: bitnami/postgresql:latest
+    container_name: database-layer
+    environment:
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=dbpassword
+      - POSTGRES_DB=api-solid
+    # volumes:
+    #   - database-volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
