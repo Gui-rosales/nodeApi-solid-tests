@@ -9,18 +9,18 @@ let gymsRepository: InMemoryGymsRepository;
 let sut: CheckInUseCase;
 
 describe('Check-in useCase', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     checkInRepository = new InMemoryCheckInsRepository();
     gymsRepository = new InMemoryGymsRepository();
     sut = new CheckInUseCase(checkInRepository, gymsRepository);
 
-    gymsRepository.items.push({
+    await gymsRepository.create({
       id: 'gymId-01',
-      title: 'Javascript Gym',
-      description: 'dawdasd',
-      phone: '',
-      latitude: new Decimal(0),
-      longitude: new Decimal(0),
+      title: 'javascript Gym',
+      description: 'A melhor academia para aprendet JS',
+      phone: '65912312312',
+      latitude: -15.2480147,
+      longitude: -59.3225057,
     });
     vi.useFakeTimers();
   });
@@ -33,8 +33,8 @@ describe('Check-in useCase', () => {
     const { checkIn } = await sut.execute({
       userId: 'userId-01',
       gymId: 'gymId-01',
-      userLatitue: 0,
-      userLongitute: 0,
+      userLatitude: -15.2480147,
+      userLongitude: -59.3225057,
     });
 
     expect(checkIn.id).toEqual(expect.any(String));
@@ -45,16 +45,16 @@ describe('Check-in useCase', () => {
     await sut.execute({
       userId: 'userId-01',
       gymId: 'gymId-01',
-      userLatitue: 0,
-      userLongitute: 0,
+      userLatitude: -15.2480147,
+      userLongitude: -59.3225057,
     });
 
     await expect(() =>
       sut.execute({
         userId: 'userId-01',
         gymId: 'gymId-01',
-        userLatitue: 0,
-        userLongitute: 0,
+        userLatitude: -15.2480147,
+        userLongitude: -59.3225057,
       })
     ).rejects.toBeInstanceOf(Error);
   });
@@ -65,8 +65,8 @@ describe('Check-in useCase', () => {
     await sut.execute({
       userId: 'userId-01',
       gymId: 'gymId-01',
-      userLatitue: 0,
-      userLongitute: 0,
+      userLatitude: -15.2480147,
+      userLongitude: -59.3225057,
     });
 
     vi.setSystemTime(new Date(2022, 0, 21, 8, 0, 0));
@@ -74,16 +74,32 @@ describe('Check-in useCase', () => {
     const { checkIn } = await sut.execute({
       userId: 'userId-01',
       gymId: 'gymId-01',
-      userLatitue: 0,
-      userLongitute: 0,
+      userLatitude: -15.2480147,
+      userLongitude: -59.3225057,
     });
 
     expect(checkIn.id).toEqual(expect.any(String));
   });
 
-  // it('Should not be able to checkIn if user is more than 100m away from the gym', async () => {
-  //
-  // });
+  it('Should not be able to checkIn if user is far away from the gym', async () => {
+    gymsRepository.items.push({
+      id: 'gymId-02',
+      title: 'Javascript Gym 2',
+      description: 'dawdasd',
+      phone: '',
+      latitude: new Decimal(-15.2480147),
+      longitude: new Decimal(-59.3225057),
+    });
+
+    await expect(() =>
+      sut.execute({
+        userId: 'user-01',
+        gymId: 'gymId-02',
+        userLatitude: -15.160585,
+        userLongitude: -59.3133231,
+      })
+    ).rejects.toBeInstanceOf(Error);
+  });
 });
 
 //eu sempre quero testar a aplicação de maneira independente de suas dependências
