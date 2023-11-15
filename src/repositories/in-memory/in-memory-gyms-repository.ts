@@ -1,6 +1,7 @@
 import { Gym, Prisma } from '@prisma/client';
-import { GymsRepository } from '../gyms-repository';
+import { FindManyNearbyParams, GymsRepository } from '../gyms-repository';
 import { randomUUID } from 'crypto';
+import { getDistanceBetweenCoordinates } from '@/utils/get-distance-between-coordinates';
 
 export class InMemoryGymsRepository implements GymsRepository {
   public items: Gym[] = [];
@@ -27,24 +28,23 @@ export class InMemoryGymsRepository implements GymsRepository {
     return gym;
   }
 
-  //   async findByEmail(email: string) {
-  //     const user = this.items.find((user) => user.email === email);
-  //     if (!user) {
-  //       return null;
-  //     }
-  //     return user;
-  //   }
+  async searchMany(query: string, page: number) {
+    return this.items
+      .filter((gym) => gym.title.includes(query))
+      .slice((page - 1) * 20, 40);
+  }
 
-  //   async create(data: Prisma.UserCreateInput) {
-  //     const user = {
-  //       id: randomUUID(),
-  //       name: data.name,
-  //       email: data.email,
-  //       password_hash: data.password_hash,
-  //       created_at: new Date(),
-  //     };
-  //     this.items.push(user);
+  async findManyNearby(params: FindManyNearbyParams) {
+    return this.items.filter((gym) => {
+      const distance = getDistanceBetweenCoordinates(
+        { longitude: params.longitude, latitude: params.latitude },
+        {
+          latitude: gym.latitude.toNumber(),
+          longitude: gym.longitude.toNumber(),
+        }
+      );
 
-  //     return user;
-  //   }
+      return distance < 10;
+    });
+  }
 }
