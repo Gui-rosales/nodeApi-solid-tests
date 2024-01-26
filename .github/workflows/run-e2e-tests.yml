@@ -1,0 +1,32 @@
+name: Run E2E Tests
+
+on: [pull_request]
+
+jobs:
+  run-unit-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: bitnami/postgresql:latest
+        ports:
+          - 5432:5432
+        environment:
+          - POSTGRES_USER=dbuser
+          - POSTGRES_PASSWORD=dbpassword
+          - POSTGRES_DB=api-solid
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - run: yarn install --immutable --immutable-cache --check-cache
+      - run: yarn test:e2e
+        env:
+          JWT_SECRET: secret
+          DATABASE_URL: postgres://dbuser:dbpassword@localhost:5432/api-solid?schema=public
