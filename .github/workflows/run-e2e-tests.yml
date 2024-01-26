@@ -12,10 +12,10 @@ jobs:
         image: bitnami/postgresql:latest
         ports:
           - 5432:5432
-        environment:
-          - POSTGRES_USER=dbuser
-          - POSTGRES_PASSWORD=dbpassword
-          - POSTGRES_DB=api-solid
+        env:
+          POSTGRESQL_USERNAME: dbuser
+          POSTGRESQL_PASSWORD: dbpassword
+          POSTGRESQL_DATABASE: api-solid
 
     steps:
       - uses: actions/checkout@v3
